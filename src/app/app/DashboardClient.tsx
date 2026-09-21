@@ -28,6 +28,11 @@ type AppData = {
   streamers: PublicStreamer[];
   tasks: AppTask[];
   withdrawals: Withdrawal[];
+  capabilities: {
+    twitchConfigured: boolean;
+    demoMode: boolean;
+    storageMode: "persistent" | "local";
+  };
 };
 type Mode = "viewer" | "streamer";
 
@@ -43,6 +48,18 @@ const statusInfo: Record<TaskStatus, { label: string; icon: typeof Clock3 }> = {
   accepted: { label: "Принято", icon: Gamepad2 },
   completed: { label: "Выполнено", icon: CheckCircle2 },
   rejected: { label: "Отклонено · возврат", icon: RotateCcw },
+};
+
+const authErrorMessages: Record<string, string> = {
+  twitch_not_configured:
+    "Twitch-вход ещё не настроен на сервере. Добавьте Client ID и Client Secret в переменные окружения Render.",
+  invalid_state: "Сессия входа устарела. Нажмите «Продолжить с Twitch» ещё раз.",
+  access_denied: "Twitch не разрешил вход. Попробуйте снова и подтвердите доступ.",
+  token_exchange_failed: "Twitch отклонил данные приложения. Проверьте Client ID, Client Secret и Redirect URL.",
+  token_missing: "Twitch не вернул токен доступа. Попробуйте войти ещё раз.",
+  profile_failed: "Не удалось получить профиль Twitch. Попробуйте чуть позже.",
+  profile_missing: "Twitch не вернул данные профиля.",
+  unexpected_error: "Во время входа произошла ошибка. Попробуйте ещё раз.",
 };
 
 function Avatar({ user, size }: { user: Pick<User, "displayName" | "avatarUrl" | "accent"> | PublicStreamer; size?: "large" }) {
@@ -82,8 +99,23 @@ export default function DashboardClient() {
   }, []);
 
   useEffect(() => {
+    const authError = new URLSearchParams(window.location.search).get("authError");
+    let errorTimer: number | undefined;
+    if (authError) {
+      errorTimer = window.setTimeout(
+        () =>
+          setError(
+            authErrorMessages[authError] || "Не удалось войти через Twitch.",
+          ),
+        0,
+      );
+      window.history.replaceState({}, "", window.location.pathname);
+    }
     const initialLoad = window.setTimeout(() => void load(), 0);
-    return () => window.clearTimeout(initialLoad);
+    return () => {
+      window.clearTimeout(initialLoad);
+      if (errorTimer !== undefined) window.clearTimeout(errorTimer);
+    };
   }, [load]);
 
   useEffect(() => {
@@ -184,14 +216,20 @@ export default function DashboardClient() {
             <h1>Войти в TaskDrop</h1>
             <p>Подключи Twitch, чтобы отправлять задания или принимать их во время стрима.</p>
             <div className="auth-options">
-              <a className="button twitch-button" href="/api/auth/twitch"><Radio size={18} /> Продолжить с Twitch</a>
-              <div className="demo-row">
-                <button disabled={busy} onClick={() => demoLogin("viewer")}>Демо: зритель</button>
-                <button disabled={busy} onClick={() => demoLogin("streamer")}>Демо: стример</button>
-              </div>
+              {data.capabilities.twitchConfigured ? (
+                <a className="button twitch-button" href="/api/auth/twitch"><Radio size={18} /> Продолжить с Twitch</a>
+              ) : (
+                <span className="button twitch-button button-disabled" aria-disabled="true"><Radio size={18} /> Twitch ещё не подключён</span>
+              )}
+              {data.capabilities.demoMode && (
+                <div className="demo-row">
+                  <button disabled={busy} onClick={() => demoLogin("viewer")}>Демо: зритель</button>
+                  <button disabled={busy} onClick={() => demoLogin("streamer")}>Демо: стример</button>
+                </div>
+              )}
             </div>
             {error && <div className="form-error" style={{ marginTop: 14 }}>{error}</div>}
-            <div className="auth-note"><Info size={17} /><span>Демо-режим работает без платёжной системы. Все рубли и операции в нём тестовые.</span></div>
+            <div className="auth-note"><Info size={17} /><span>Сайт уже работает как MVP. Пока платёжная система не подключена, рубли, пополнение и вывод остаются тестовыми.</span></div>
           </section>
         </main>
       </div>

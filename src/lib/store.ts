@@ -3,7 +3,10 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { Database, PublicStreamer, StreamTask, User } from "@/lib/types";
 
-const DATA_DIRECTORY = path.join(process.cwd(), "data");
+const DATA_DIRECTORY =
+  process.env.DATA_DIRECTORY ||
+  process.env.RENDER_DISK_PATH ||
+  path.join(process.cwd(), "data");
 const DATA_FILE = path.join(DATA_DIRECTORY, "db.json");
 
 const now = () => new Date().toISOString();

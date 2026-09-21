@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { apiError } from "@/lib/api";
 import { setSession } from "@/lib/session";
+import { isDemoModeEnabled } from "@/lib/runtime";
 
 function login(role: string | null) {
+  if (!isDemoModeEnabled()) {
+    return apiError("Демо-вход отключён.", 403);
+  }
   if (role !== "viewer" && role !== "streamer") {
     return apiError("Выберите роль зрителя или стримера.");
   }
@@ -24,4 +28,3 @@ export async function GET(request: NextRequest) {
   setSession(redirect, role === "viewer" ? "demo-viewer" : "streamer-foxxy");
   return redirect;
 }
-

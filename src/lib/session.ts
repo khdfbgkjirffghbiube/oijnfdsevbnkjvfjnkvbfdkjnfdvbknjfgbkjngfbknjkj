@@ -7,6 +7,12 @@ function secret() {
   return process.env.SESSION_SECRET || "taskdrop-local-development-secret";
 }
 
+export function shouldUseSecureCookies() {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
+  if (appUrl) return appUrl.startsWith("https://");
+  return process.env.NODE_ENV === "production";
+}
+
 function signature(value: string) {
   return createHmac("sha256", secret()).update(value).digest("base64url");
 }
@@ -43,7 +49,7 @@ export function setSession(response: NextResponse, userId: string) {
   response.cookies.set(COOKIE_NAME, encodeSession(userId), {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: shouldUseSecureCookies(),
     path: "/",
     maxAge: 60 * 60 * 24 * 30,
   });
@@ -53,9 +59,8 @@ export function clearSession(response: NextResponse) {
   response.cookies.set(COOKIE_NAME, "", {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: shouldUseSecureCookies(),
     path: "/",
     maxAge: 0,
   });
 }
-

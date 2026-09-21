@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSessionUserId } from "@/lib/session";
 import { readDatabase } from "@/lib/store";
+import {
+  getStorageMode,
+  isDemoModeEnabled,
+  isTwitchConfigured,
+} from "@/lib/runtime";
 
 export const dynamic = "force-dynamic";
 
@@ -56,6 +61,15 @@ export async function GET(request: NextRequest) {
     ? database.withdrawals.filter((item) => item.userId === user.id)
     : [];
 
-  return NextResponse.json({ user, streamers, tasks, withdrawals });
+  return NextResponse.json({
+    user,
+    streamers,
+    tasks,
+    withdrawals,
+    capabilities: {
+      twitchConfigured: isTwitchConfigured(),
+      demoMode: isDemoModeEnabled(),
+      storageMode: getStorageMode(),
+    },
+  });
 }
-

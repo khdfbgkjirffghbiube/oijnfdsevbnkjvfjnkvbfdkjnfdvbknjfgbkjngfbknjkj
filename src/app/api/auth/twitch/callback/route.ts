@@ -23,13 +23,16 @@ function fail(request: NextRequest, reason: string) {
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get("code");
   const state = request.nextUrl.searchParams.get("state");
+  const oauthError = request.nextUrl.searchParams.get("error");
   const savedState = request.cookies.get("taskdrop_oauth_state")?.value;
   const clientId = process.env.TWITCH_CLIENT_ID;
   const clientSecret = process.env.TWITCH_CLIENT_SECRET;
 
-  if (!code || !state || !savedState || state !== savedState) {
+  if (!state || !savedState || state !== savedState) {
     return fail(request, "invalid_state");
   }
+  if (oauthError) return fail(request, "access_denied");
+  if (!code) return fail(request, "token_missing");
   if (!clientId || !clientSecret) {
     return fail(request, "twitch_not_configured");
   }

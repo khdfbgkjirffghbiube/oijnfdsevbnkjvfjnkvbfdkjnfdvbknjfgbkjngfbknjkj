@@ -24,6 +24,7 @@ NEXT_PUBLIC_APP_URL=https://ваш-сервис.onrender.com
 TWITCH_CLIENT_ID=ваш_client_id
 TWITCH_CLIENT_SECRET=ваш_client_secret
 SESSION_SECRET=длинная_случайная_строка
+DEMO_MODE=true
 ```
 
 После этого Redirect URL в Twitch будет:
@@ -42,6 +43,13 @@ https://ваш-сервис.onrender.com/api/auth/twitch/callback
 - демонстрационная заявка на вывод;
 - защищённая уникальным ключом ссылка OBS Browser Source;
 - локальное JSON-хранилище для MVP.
+
+Проверка готовности после деплоя: `https://ваш-сервис.onrender.com/api/health`.
+Ответ показывает только наличие настроек, но никогда не раскрывает секреты.
+
+JSON-файл сохраняет данные между запросами, но на бесплатном Render может
+сброситься после перезапуска или нового деплоя. Для постоянного хранения задайте
+`DATA_DIRECTORY` на подключённый persistent disk или замените хранилище на PostgreSQL.
 
 ## Перед продакшеном
 
