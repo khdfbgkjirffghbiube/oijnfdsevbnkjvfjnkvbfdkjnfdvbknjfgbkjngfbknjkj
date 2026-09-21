@@ -17,6 +17,21 @@ npm run dev
 http://localhost:3000/api/auth/twitch/callback
 ```
 
+Для Render добавьте в Environment Variables:
+
+```text
+NEXT_PUBLIC_APP_URL=https://ваш-сервис.onrender.com
+TWITCH_CLIENT_ID=ваш_client_id
+TWITCH_CLIENT_SECRET=ваш_client_secret
+SESSION_SECRET=длинная_случайная_строка
+```
+
+После этого Redirect URL в Twitch будет:
+
+```text
+https://ваш-сервис.onrender.com/api/auth/twitch/callback
+```
+
 ## Что работает
 
 - вход через Twitch и два демо-входа;
@@ -32,4 +47,3 @@ http://localhost:3000/api/auth/twitch/callback
 
 Замените JSON-хранилище на PostgreSQL, добавьте реальный платёжный провайдер,
 идемпотентные вебхуки, модерацию заданий и полноценную систему выплат.
-

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { setSession } from "@/lib/session";
 import { upsertTwitchUser } from "@/lib/store";
+import { getAppOrigin } from "@/lib/url";
 
 type TwitchTokenResponse = {
   access_token?: string;
@@ -34,7 +35,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const origin = process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin;
+    const origin = getAppOrigin(request);
     const redirectUri = `${origin}/api/auth/twitch/callback`;
     const tokenUrl = new URL("https://id.twitch.tv/oauth2/token");
     tokenUrl.searchParams.set("client_id", clientId);
@@ -74,4 +75,3 @@ export async function GET(request: NextRequest) {
     return fail(request, "unexpected_error");
   }
 }
-

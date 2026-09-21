@@ -1,5 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
+import { getAppOrigin } from "@/lib/url";
 
 export async function GET(request: NextRequest) {
   const clientId = process.env.TWITCH_CLIENT_ID;
@@ -10,7 +11,7 @@ export async function GET(request: NextRequest) {
   }
 
   const state = randomBytes(24).toString("hex");
-  const origin = process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin;
+  const origin = getAppOrigin(request);
   const redirectUri = `${origin}/api/auth/twitch/callback`;
   const authorize = new URL("https://id.twitch.tv/oauth2/authorize");
   authorize.searchParams.set("client_id", clientId);
@@ -29,4 +30,3 @@ export async function GET(request: NextRequest) {
   });
   return response;
 }
-
