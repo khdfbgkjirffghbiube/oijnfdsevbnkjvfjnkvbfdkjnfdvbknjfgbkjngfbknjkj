@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
   const clientId = process.env.TWITCH_CLIENT_ID;
   if (!clientId || !isTwitchConfigured()) {
     return NextResponse.redirect(
-      new URL("/app?authError=twitch_not_configured", request.url),
+      new URL("/app?authError=twitch_not_configured", getAppOrigin(request)),
     );
   }
 

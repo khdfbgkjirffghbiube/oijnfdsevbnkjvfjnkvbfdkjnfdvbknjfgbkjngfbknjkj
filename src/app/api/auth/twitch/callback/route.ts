@@ -17,7 +17,9 @@ type TwitchUsersResponse = {
 };
 
 function fail(request: NextRequest, reason: string) {
-  return NextResponse.redirect(new URL(`/app?authError=${reason}`, request.url));
+  return NextResponse.redirect(
+    new URL(`/app?authError=${reason}`, getAppOrigin(request)),
+  );
 }
 
 export async function GET(request: NextRequest) {
@@ -70,7 +72,9 @@ export async function GET(request: NextRequest) {
       displayName: profile.display_name,
       avatarUrl: profile.profile_image_url,
     });
-    const response = NextResponse.redirect(new URL("/app", request.url));
+    const response = NextResponse.redirect(
+      new URL("/app", getAppOrigin(request)),
+    );
     response.cookies.delete("taskdrop_oauth_state");
     setSession(response, user.id);
     return response;

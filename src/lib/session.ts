@@ -8,6 +8,7 @@ function secret() {
 }
 
 export function shouldUseSecureCookies() {
+  if (process.env.RENDER) return true;
   const appUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
   if (appUrl) return appUrl.startsWith("https://");
   return process.env.NODE_ENV === "production";
